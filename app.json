@@ -1,0 +1,18 @@
+{
+  "pages": [
+
+    "pages/index/index",
+    "pages/publish/index",
+        "pages/star/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#565765",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "北美二手社",
+    "navigationStyle": "custom",
+    "backgroundColor": "#eeeeee",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": false,
+    "onReachBottomDistance": "50"
+  }
+}

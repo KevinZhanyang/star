@@ -1,0 +1,62 @@
+<view style='height:{{height}}px;width:100%;' class='page' bindtap="handletap" bindtouchstart="handletouchtart" bindtouchmove="handletouchmove" bindtouchend="handletouchend">
+
+  <view class='nav-wrap'>
+    <view style='padding-top: {{barHeight!=44?(barHeight*2+9):(barHeight*2+6)}}rpx;'>
+      <view class='index-top' style='height:68rpx'>
+        <view style='display: flex; justify-content: space-around;flex-direction: column'>
+          <view class='nav-capsule'>
+            <!-- <view class='location_img_rule'>
+            <image class="location_img" src="/static/icon/return.png"></image>
+          </view> -->
+            <view class='filter_top_return' bindtap='hideFilter' data-type='{{navbarData.type}}'>
+              <image class="location_img" src="/images/return.png"></image>
+            </view>
+            <view class='filter_top_middle'></view>
+            <view class='filter_top_index' bindtap='_backhome'>
+              <image class="index_img" src="/images/home_index.png"></image>
+            </view>
+          </view>
+        </view>
+        <view class='index-middle'>
+          <view class='index-middle-capsule' style='height: {{height!=44?height+12:height}}px;'>
+            <view class="title">
+              <view>{{navbarData.title}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view>
+    <!-- 弹幕 -->
+    <view class="doommview">
+      <block wx:for="{{doommData}}" wx:key="id">
+
+        <view></view>
+        <view bindtap='autoWish' data-text="{{item.text}}" wx:if="{{item.display}}" class="aon" style="animation: first {{25}}s ease;top:{{item.top}}%;color:{{item.color}};animation-fill-mode:none;">
+
+
+          <view class='aon-top' wx:if="{{item.self==1}}">
+            <image src="/images/soon.png"></image>
+          </view>
+          <view class='aon-bottom'>
+            <image class='avatar' src='{{item.avatar}}'></image>
+            <view class='wish' style="{{item.self==1?'color:rgba(243,217,52,1)':''}}">{{item.text}}</view>
+          </view>
+
+
+        </view>
+      </block>
+    </view>
+    <view class='body' style='z-index:999;' style='position:fixed;{{height==812?"top:523rpx;height:600rpx":(height>700?"top:380rpx;height:600rpx":"top:370rpx;height:600rpx")}};;z-index:9;'>
+
+      <textarea class='textarea' style='z-index:999;' placeholder='新年新气象，许下你的许愿' maxlength="-1" bindinput="updateContent" value="{{content}}"></textarea>
+      <text class="currentWordNumber">{{currentWordNumber|0}}/88</text>
+
+
+    </view>
+    <view class='submit' bindtap='publish' style='position:fixed;{{height==812?"top:1201rpx;":(height>700?"top:1143rpx;":"top:1043rpx;")}};left:110rpx;z-index:998;'>许下心愿</view>
+  </view>
+
+
+</view>

@@ -1,0 +1,26 @@
+<view class="popup" wx:if='{{!showShareMoment}}' bindtap='preventTouchMove'>
+</view>
+
+<view wx:if='{{!showShareMoment}}'>
+  <view class="popup_container" style='top:{{barHeight/4*3}}px'>
+
+    <view class='popup_middle' style='height:{{height-50}}px'>
+      <block wx:if="{{canvasIndex!=0}}">
+        <view class='v' style='margin-left:{{canvasWidth*0.12/2}}px;'>
+          <canvas canvas-id="shareCanvas" style="width:{{canvasWidth*0.88}}px;height:{{height*0.88}}px" />
+        </view>
+      </block>
+      <block wx:else>
+        <view style='margin-left:{{canvasWidth*0.12/2}}px;'>
+          <image style="width:{{canvasWidth*0.88}}px;height:{{height*0.88}}px" src='{{saveImg}}'></image>
+        </view>
+      </block>
+    </view>
+    <view class='popup_bottom' style='left:{{canvasWidth*0.12/2}}px;width:{{canvasWidth*0.88}}px;'>
+      <button class="publishedRe" style="background:#cfcfcf,color:#acacac;width:{{canvasWidth*0.88/2*0.6}}px;" disabled="{{ publishButtonDisabled }}" size="default" formType="submit" bindtap='_backhome'>返回</button>
+
+      <button class="published" style="background:#f3d934,color:#000000;width:{{canvasWidth*0.88/2*0.8}}px;" disabled="{{ publishButtonDisabled }}" size="default" formType="submit"  bindtap='saveImg'>保存到相册</button>
+    </view>
+  </view>
+
+</view>

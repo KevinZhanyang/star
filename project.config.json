@@ -13,7 +13,7 @@
 		]
 	},
 	"setting": {
-		"urlCheck": true,
+		"urlCheck": false,
 		"es6": true,
 		"postcss": true,
 		"minified": true,
@@ -23,7 +23,7 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.4.3",
 	"appid": "wxcfb9fa1346025ac6",
-	"projectname": "want",
+	"projectname": "star",
 	"condition": {
 		"search": {
 			"current": -1,

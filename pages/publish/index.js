@@ -11,13 +11,16 @@ Page({
    * 页面的初始数据
    */
   data: {
-    timeInter:0,
+    showSuccess: false,
+    dataList: [],
+    timeInter: 0,
     doommData: [],
-    timeOut:[],
-    timmer:0,
+    timeOut: [],
+    timmer: 0,
     currentPageIndex: 1,
     totalNum: 0,
-    datalock:0,
+    datalock: 0,
+    music: true,
     nvabarData: {
       showCapsule: 1, //是否显示左上角图标
       title: '许下心愿', //导航栏 中间的标题
@@ -25,17 +28,13 @@ Page({
     },
     lastX: 0,          //滑动开始x轴位置
     lastY: 0,          //滑动开始y轴位置
-   text: "没有滑动",
+    text: "没有滑动",
     currentGesture: 0, //标识手势
   },
   hideFilter() {
     this.onHide()
     wx.navigateBack({
-      
     })
-    // wx.redirectTo({
-    //   url: '/pages/index/index',
-    // })
   },
   _backhome() {
     wx.redirectTo({
@@ -46,43 +45,55 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function(options) {
-    
-
-
+  onLoad: function (options) {
+    wx.downloadFile({
+      url: wx.getStorageSync("user").avatar, //注意公众平台是否配置相应的域名
+      success: function (res) {
+        that.setData({
+          acvtarUrl: res.tempFilePath
+        })
+        app.globalData.acvtarUrl = res.tempFilePath
+      }
+    })
     let that = this;
     pages = this;
 
     this.setData({
+      music: app.globalData.musicStatus == 1 ? false : true,
       height: app.globalData.height,
       barHeight: app.globalData.barHeight,
     })
 
-    if (app.globalData.barHeight<44){
-      topArray = [4, 2, 5,  3, 4, 5, 3]
+    if (app.globalData.barHeight < 44) {
+      topArray = [4, 2, 5, 3, 4, 5, 3]
     }
   },
 
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
-  onReady: function() {
+  onReady: function () {
 
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow: function() {
-    this.music(0);
+  onShow: function () {
+
     console.log("iiii");
-    console.log(i);
-    i=0;
+    console.log(app.globalData.musicStatus);
+    i = 0;
     let that = this;
     pages = this;
     doommLists = [];
+
+
+    this.music(app.globalData.musicStatus);
+
     this.setData({
-      doommData: []
+      doommData: [],
+      dataList: []
     })
     clearInterval(app.globalData.inter);
     clearInterval(app.globalData.timeOutdata);
@@ -93,13 +104,16 @@ Page({
   /**
    * 生命周期函数--监听页面隐藏
    */
-  onHide: function() {
-    i=0;
+  onHide: function () {
+    i = 0;
     clearInterval(app.globalData.inter);
     clearInterval(app.globalData.timeOutdata);
+    clearInterval(this.data.setInter);
+    clearInterval(this.data.timeOutdata);
     doommLists = [];
     this.setData({
-      doommData: []
+      doommData: [],
+      dataList: []
     })
 
     i = 0;
@@ -108,28 +122,28 @@ Page({
   /**
    * 生命周期函数--监听页面卸载
    */
-  onUnload: function() {
+  onUnload: function () {
 
   },
 
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
-  onPullDownRefresh: function() {
+  onPullDownRefresh: function () {
 
   },
 
   /**
    * 页面上拉触底事件的处理函数
    */
-  onReachBottom: function() {
+  onReachBottom: function () {
 
   },
 
   /**
    * 用户点击右上角分享
    */
-  onShareAppMessage: function() {
+  onShareAppMessage: function () {
 
   },
   music(status) {
@@ -142,6 +156,7 @@ Page({
           status: false
         })
       })
+      app.globalData.musicStatus = 1
     } else {
       app.AppMusic.play();
       app.AppMusic.onPlay(() => {
@@ -150,33 +165,49 @@ Page({
           status: true
         })
       })
+      app.globalData.musicStatus = 0
     }
     console.log(status)
   },
-  bindbt: function() {
+  bindbt: function () {
     let that = this;
     that.getStart()
+    //每隔5秒获取一次数据
     var setInter = setInterval(
       function () {
         that.getWish()
-      }, 1000);
-
+      }, 6000);
+    //每隔2秒发射一个数据
     var timeOutdata = setInterval(function () {
-      if (doommLists.length > 5) {
-        doommLists.splice(0, 1);
+      var dataList = pages.data.dataList;
+      var doommData = pages.data.doommData;
+      if (doommData.length > 7) {
+        doommData.splice(0, 2);
+        var data = dataList.splice(0, 1);
+        doommData.push(data[0])
         pages.setData({
-          doommData: doommLists
+          doommData: doommData,
+          dataList: dataList
+        })
+      } else {
+        var data = dataList.splice(0, 1);
+        doommData.push(data[0])
+        pages.setData({
+          doommData: doommData,
+          dataList: dataList
         })
       }
-    }, 1000)
-
+    }, 3000)
+    //记下定时器
+    this.setData({
+      setInter: setInter,
+      timeOutdata: timeOutdata
+    })
     app.globalData.inter = setInter;
     app.globalData.timeOutdata = timeOutdata
-
-
   },
   updateContent(event) {
-    if (event.detail.value.length>88){
+    if (event.detail.value.length > 88) {
       this.setData({
         content: this.data.content
       })
@@ -185,6 +216,18 @@ Page({
     this.setData({
       currentWordNumber: event.detail.value.length,
       content: event.detail.value
+    })
+  }, actionMusic() {
+
+    if (this.data.music) {
+      //暂停 
+      this.music(1)
+    } else {
+      //播放
+      this.music(0)
+    }
+    this.setData({
+      music: !this.data.music
     })
   },
 
@@ -196,24 +239,24 @@ Page({
   },
   publish() {
     console.log("来了")
-    let that =this;
-    if(this.data.datalock==1){
+    let that = this;
+    if (this.data.datalock == 1) {
       return false;
     }
- 
+
     if (!this.data.content) {
       wx.showLoading({
         title: '请输入您的愿望',
-        duration:1500
+        duration: 1500
       })
-    
+
       return false;
     }
     wx.showLoading({
       title: '请稍后',
     })
     this.setData({
-      datalock:1
+      datalock: 1
     })
     var data = {
       text: this.data.content
@@ -221,48 +264,48 @@ Page({
     util.request(WISH_CREATE, data, 'POST').then(res => {
       if (res.code == 200) {
         wx.hideLoading()
-        wx.showLoading({
-          title: '发布成功',
-          duration: 1500
-        });
 
 
-        doommLists.push(new Doomm(wx.getStorageSync("user").avatar, this.data.content, 26, Math.floor(Math.random() * 10, 3), getRandomColor()));
+        var doomData = this.data.doommData
+
+        doomData.push(new Doomm(wx.getStorageSync("user").avatar, this.data.content, 26, Math.floor(Math.random() * 10, 3), getRandomColor()));
         that.setData({
-          doommData: doommLists
-
+          doommData: doomData
         })
-        setTimeout(function(){
+        setTimeout(function () {
           that.setData({
             datalock: 0,
             content: "",
-            currentWordNumber:0
+            currentWordNumber: 0,
+            showSuccess: true
           })
-        },1500)
-        
+
+
+
+
+
+
+
+
+        }, 1500)
+
+
+
       } else {
         wx.hideLoading()
         that.setData({
           datalock: 0
         })
       }
-     
-    });
 
+    });
+  },
+  close() {
+    this.setData({
+      showSuccess: false
+    })
   },
   getWish() {
-
-    if(this.data.timmer<=6){
-      this.setData({
-        timmer: this.data.timmer + 1
-      })
-      return false;
-    }
-    this.setData({
-      timmer: 0
-    })
-  
-
     let that = this;
     /**分页参数构建 */
     var options = {};
@@ -272,34 +315,22 @@ Page({
     options.perPageNum = 5;
     util.request(WISH_CREATE, options, 'GET').then(res => {
       if (res.code == 200) {
-        if (that.data.doommData.length > 6) {
-          return false;
+        if (res.body.wishList.length < options.perPageNum) {
+          that.setData({
+            totalNum: res.body.totalNum,
+            currentPageIndex: 1
+          })
         } else {
-          if (res.body.wishList.length < options.perPageNum) {
-            that.setData({
-              totalNum: res.body.totalNum,
-              currentPageIndex: 1
-            })
-          } else {
-            that.setData({
-              totalNum: res.body.totalNum,
-              currentPageIndex: that.data.currentPageIndex + 1
-            })
+
+          var dataList = this.data.dataList;
+          for (let i = 0; i < res.body.wishList.length; i++) {
+            dataList.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
           }
-        }
-        for (let i = 0; i < res.body.wishList.length; i++) {
-      
-          setTimeout(function () {
-            if (that.data.doommData.length > 8) {
-
-            } else {
-              doommLists.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
-              that.setData({
-                doommData: doommLists
-              })
-            }
-
-          }, i * 4000)
+          that.setData({
+            totalNum: res.body.totalNum,
+            currentPageIndex: that.data.currentPageIndex + 1,
+            dataList: dataList
+          })
         }
       } else {
       }
@@ -321,14 +352,15 @@ Page({
     options.perPageNum = 5;
     util.request(WISH_CREATE, options, 'GET').then(res => {
       if (res.code == 200) {
+        var dataList = this.data.dataList;
         for (let i = 0; i < res.body.wishList.length; i++) {
-          setTimeout(function () {
-            doommLists.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
-            that.setData({
-              doommData: doommLists
-            })
-          }, i * 2000)
+          dataList.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
         }
+        that.setData({
+          totalNum: res.body.totalNum,
+          currentPageIndex: that.data.currentPageIndex + 1,
+          dataList: dataList
+        })
       } else {
       }
     });
@@ -346,8 +378,8 @@ Page({
         text = "向左滑动"
       else if (tx > 0)
         text = "向右滑动"
-        setTimeout(function(){},1000)
-     
+      setTimeout(function () { }, 1000)
+
     }
     //上下方向滑动
     else {
@@ -380,17 +412,17 @@ Page({
 })
 
 var doommLists = [];
-var topArray = [4, 2, 5, 4, 3]
+var topArray = [3, 2, 4, 2, 3]
 var flag = false;
 var i = 0;
 class Doomm {
   constructor(avatar, text, top, time, color) {
 
     if (topArray.length < 2) {
-      if (pages.data.barHeight<44){
-        topArray = [ 3, 4,5, 2, 3,]
-      }else{
-        topArray = [4, 3, 5, 2, 3,5]
+      if (pages.data.barHeight < 44) {
+        topArray = [3, 4, 2, 2, 3,]
+      } else {
+        topArray = [2, 3, 4, 2, 3, 5]
       }
       flag = !flag;
     }
@@ -409,23 +441,29 @@ class Doomm {
     } else {
       top = top * 6 + 3;
     }
-   
+
     if (topArray.length < 1) {
       topArray.unshift(3)
     }
     if (pages.data.barHeight < 44) {
-      top = top-2;
+      top = top - 2;
     } else {
-    
+      top = top - 5;
     }
-    if(i==0){
-      this.self=1;
+    if (i == 0) {
+      this.self = 1;
       if (pages.data.barHeight < 44) {
         top = 17
       } else {
         top = 24
       }
-     
+
+    }
+
+    if (pages.data.height < 814) {
+      top = top - 2;
+    } else {
+      top = top - 6;
     }
 
     this.avatar = avatar;

@@ -28,9 +28,21 @@
     </view>
   </view>
   <view>
+
+   <div class="space">
+        <div class="stars">
+          <div class="star"></div>
+          <div class="star pink"></div>
+          <div class="star blue"></div>
+          <div class="star yellow"></div>
+          <div class="star pink2"></div>
+          <div class="star blue2"></div>
+          <div class="star yellow2"></div>
+        </div>
+      </div>
     <!-- 弹幕 -->
     <view class="doommview">
-      <block wx:for="{{doommData}}" wx:key="id">
+      <block wx:for="{{doommDatasss}}" wx:key="id">
 
         <view></view>
         <view bindtap='autoWish' data-text="{{item.text}}" wx:if="{{item.display}}" class="aon" style="animation: first {{25}}s ease;top:{{item.top}}%;color:{{item.color}};animation-fill-mode:none;">
@@ -48,15 +60,40 @@
         </view>
       </block>
     </view>
-    <view class='body' style='z-index:999;' style='position:fixed;{{height==812?"top:523rpx;height:600rpx":(height>700?"top:380rpx;height:600rpx":"top:370rpx;height:600rpx")}};;z-index:9;'>
+    <view class='body' style='z-index:999;' style='position:fixed;bottom:{{height==812?height/2+80:(height>=812?height/2+78:height/2-10)}}rpx;height:600rpx;;z-index:9;'>
 
       <textarea class='textarea' style='z-index:999;' placeholder='新年新气象，许下你的许愿' maxlength="-1" bindinput="updateContent" value="{{content}}"></textarea>
       <text class="currentWordNumber">{{currentWordNumber|0}}/88</text>
 
 
     </view>
-    <view class='submit' bindtap='publish' style='position:fixed;{{height==812?"top:1201rpx;":(height>700?"top:1143rpx;":"top:1043rpx;")}};left:110rpx;z-index:998;'>许下心愿</view>
+    <view class='submit' bindtap='publish' style='position:fixed;bottom:{{height==812?height/4+90:(height>812?height/4+130:height/4+10)}}rpx;left:109rpx;z-index:998;'>许下心愿</view>
   </view>
+ <image wx:if="{{music}}" class='actionMusic' src="/images/music.png" bindtap='actionMusic'></image>
+        <image wx:else class='actionMusicPuse' src="/images/puse.png" bindtap='actionMusic'></image>
+
+</view>
+
+<view class="mask" catchtouchmove="preventTouchMove" wx:if="{{showSuccess}}"></view>
+
+<view class="modalDlg" wx:if="{{showModal}}">
+  <image src="/figures/logo-smile.png" />
+  <text>欢迎来到模态对话框~</text>
+  <button bindtap="go">点我可以关掉对话框</button>
+</view>
+
+<button wx:if="{{showModal}}" bindtap="submit">点我弹窗</button>
 
 
+
+<view class='showSuccess' wx:if="{{showSuccess}}">
+  <view class='showSuccessTxt'>发布成功！请联系客服获得抽奖凭证</view>
+  <view class='creat-box_success'>
+    <form bindsubmit="close" report-submit='true'>
+      <button class="creat_success creat-l_success" form-type="submit" style='padding: 0 !important;'>关闭</button>
+    </form>
+
+    <button class="creat_success creat-r_success" style='padding: 0 !important;' open-type='contact'>联系客服</button>
+
+  </view>
 </view>

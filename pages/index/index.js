@@ -7,7 +7,7 @@ import {
 } from "../../lib/api.js";
 let app = getApp();
 let goodsList = [
-  { actEndTime: '2019-01-02 10:00:43' },
+  { actEndTime: '2019-01-05 19:00:00' },
 ]
 Page({
 
@@ -15,79 +15,71 @@ Page({
    * 页面的初始数据
    */
   data: {
+    showSuccess: false,
+    music: true,
+    dataList: [],
     doommData: [],
     showWaiter: false,
-    timeOut:[],
+    timeOut: [],
     //请求数据当前页码
     currentPageIndex: 1,
-    totalNum:0,
+    totalNum: 0,
     countDownList: [],
     actEndTimeList: [],
-    showPublish:false,
-    timmer:0
+    showPublish: false,
+    timmer: 0
   },
   getWish() {
-    if (this.data.timmer <= 7) {
-      this.setData({
-        timmer: this.data.timmer + 1
-      })
+    if (this.data.getWish == 1) {
       return false;
     }
     this.setData({
-      timmer: 0
+      getWish: 1
     })
+
     let that = this;
     /**分页参数构建 */
     var options = {};
     options.page = that.data.currentPageIndex;
     options.currentStartIndex = that.data.currentPageIndex * 10;
     options.currentPageIndex = that.data.currentPageIndex;
-    options.perPageNum =5;
+    options.perPageNum = 5;
     util.request(WISH_CREATE, options, 'GET').then(res => {
+
       if (res.code == 200) {
-       
-        if (that.data.doommData.length >7) {
-              return false;
-        }else{
-          if (res.body.wishList.length < options.perPageNum) {
-            that.setData({
-              totalNum: res.body.totalNum,
-              currentPageIndex: 1
-            })
-          } else {
-            that.setData({
-              totalNum: res.body.totalNum,
-              currentPageIndex: that.data.currentPageIndex + 1
-            })
-          }
-        }
-        for (let i = 0; i < res.body.wishList.length; i++) {
-          setTimeout(function () {
-            if (that.data.doommData.length >7) {
+        if (res.body.wishList.length < options.perPageNum) {
+          that.setData({
+            totalNum: res.body.totalNum,
+            currentPageIndex: 1
+          })
+        } else {
 
-            } else {
-
-              doommList.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
-              that.setData({
-                doommData: doommList
-              })
+          var dataList = this.data.dataList;
+          for (let i = 0; i < res.body.wishList.length; i++) {
+            if (res.body.wishList[i]) {
+              dataList.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
             }
-
-          }, i * 8000)
+          }
+          that.setData({
+            totalNum: res.body.totalNum,
+            currentPageIndex: that.data.currentPageIndex + 1,
+            dataList: dataList
+          })
         }
       } else {
       }
+      that.setData({
+        getWish: 0
+      })
     });
-
-
   }
   ,
   getStart() {
-    if(this.data.lock){
-       return false;
+    if (this.data.lock) {
+      return false;
     }
     this.setData(
-      { lock: 1}
+      { lock: 1 }
     )
     let that = this;
     /**分页参数构建 */
@@ -95,27 +87,20 @@ Page({
     options.page = 2;
     options.currentStartIndex = 20;
     options.currentPageIndex = 2;
-    options.perPageNum =5;
+    options.perPageNum = 5;
     util.request(WISH_CREATE, options, 'GET').then(res => {
       if (res.code == 200) {
-        that.setData({
-          totalNum:res.body.totalNum
-        })
-        for (let i = 0; i < 3; i++) {
-          setTimeout(function () {
-            if (that.data.doommData.length>3){
-      
-            }else{
-              doommList.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
-              if(that.data.setInter!=-1){
-                that.setData({
-                  doommData: doommList
-                })
-              }
-            }
-           
-          }, i * 5000)
+        var dataList = this.data.dataList;
+        for (let i = 0; i < res.body.wishList.length; i++) {
+          if (res.body.wishList[i]) {
+            dataList.push(new Doomm(res.body.wishList[i].avatar, res.body.wishList[i].text, i, Math.floor(Math.random() * 10, 3), getRandomColor()));
+          }
         }
+        that.setData({
+          totalNum: res.body.totalNum,
+          currentPageIndex: that.data.currentPageIndex + 1,
+          dataList: dataList
+        })
       } else {
       }
     });
@@ -138,7 +123,8 @@ Page({
   },
   go() {
   },
-  onLoad: function() {
+  onLoad: function () {
+
     let that = this;
     let endTimeList = [];
     // 将活动的结束时间参数提成一个单独的数组，方便操作
@@ -146,53 +132,71 @@ Page({
     this.setData({ actEndTimeList: endTimeList });
     // 执行倒计时函数
     this.countDown()
- 
+
     this.setData({
+      music: app.globalData.musicStatus == 1 ? false : true,
       height: app.globalData.height,
     })
     page = this;
     that.bindbt();
   },
-  bindbt: function() {
-    clearInterval(app.globalData.inter);
-    clearInterval(app.globalData.timeOutdata);
+  bindbt: function () {
     let that = this;
-    that.getStart();
+    that.getStart()
+    //每隔5秒获取一次数据
     var setInter = setInterval(
-      function() {
+      function () {
         that.getWish()
-      }, 1000);
-
+      }, 6000);
+    //每隔2秒发射一个数据
     var timeOutdata = setInterval(function () {
-      if (doommList.length>5){
-        doommList.splice(0, 1);
+      if (page.data.push == 1) {
+        return false;
+      }
+      page.setData({
+        push: 1
+      })
+      var dataList = page.data.dataList;
+      var doommData = page.data.doommData;
+      if (doommData.length > 8) {
+        doommData.splice(0, 2);
+        var data = dataList.splice(0, 1);
+        if (data[0]) {
+          doommData.push(data[0])
+          page.setData({
+            doommData: doommData,
+            dataList: dataList
+          })
+        }
         page.setData({
-          doommData: doommList
+          push: 0
+        })
+      } else {
+        var data = dataList.splice(0, 1);
+        if (data[0]) {
+          doommData.push(data[0])
+          page.setData({
+            doommData: doommData,
+            dataList: dataList
+          })
+        }
+        page.setData({
+          push: 0
         })
       }
-    }, 1000)
+
+    }, 3000)
+    //记下定时器
     app.globalData.inter = setInter;
     app.globalData.timeOutdata = timeOutdata
-    that.setData({
-      setInter: setInter,
-      timeOutdata: timeOutdata,
-    });
   },
   goPublish() {
- 
     this.onHide()
     wx.navigateTo({
-      url: '/pages/publish/index',
-      success:function(){
-        
+      url: '/pages/publish/index?music=' + (this.data.music ? 0 : 1) + "",
+      success: function () {
       }
     })
-    
-  
-    // this.setData({
-    //   showPublish: !this.data.showPublish
-    // })
-  
   },
   music(status) {
     let that = this;
@@ -204,6 +208,7 @@ Page({
           status: false
         })
       })
+      app.globalData.musicStatus = 1
     } else {
       app.AppMusic.play();
       app.AppMusic.onPlay(() => {
@@ -212,20 +217,35 @@ Page({
           status: true
         })
       })
+      app.globalData.musicStatus = 0;
     }
     console.log(status)
   },
- 
+
+  actionMusic() {
+
+    if (this.data.music) {
+      //暂停 
+      this.music(1)
+    } else {
+      //播放
+      this.music(0)
+    }
+    this.setData({
+      music: !this.data.music
+    })
+  },
+
   onHide() {
-    i=0;
+    i = 0;
     clearInterval(app.globalData.inter);
     clearInterval(app.globalData.timeOutdata);
+    clearInterval(this.data.timeInter)
     doommList = [];
     this.setData({
-      doommData: []
+      doommData: [],
+      dataList: []
     })
-  
-    
   },
   bindGetUserInfo(event) {
     let that = this;
@@ -281,34 +301,49 @@ Page({
       }
     })
   },
-  onShow(){
-    this.music(0);
+  onShow() {
+    let that = this;
+    this.music(app.globalData.musicStatus);
     let endTimeList = [];
     // 将活动的结束时间参数提成一个单独的数组，方便操作
     goodsList.forEach(o => { endTimeList.push(o.actEndTime) })
     this.setData({ actEndTimeList: endTimeList });
     // 执行倒计时函数
     this.countDown()
-    i=0;
+    i = 0;
     doommList = [];
     this.setData({
-      doommData: []
+      doommData: [],
+      dataList: [],
+      getWish: 0,
+      push: 0
     })
-    if(wx.getStorageSync("token")){
-        this.setData({
-          login:true,
-        })
+    if (wx.getStorageSync("token")) {
+      this.setData({
+        login: true,
+      })
     }
-    this.onLoad();
+    // 将活动的结束时间参数提成一个单独的数组，方便操作
+    goodsList.forEach(o => { endTimeList.push(o.actEndTime) })
+    this.setData({ actEndTimeList: endTimeList });
+    // 执行倒计时函数
+    this.countDown()
+
+    this.setData({
+      music: app.globalData.musicStatus == 1 ? false : true,
+      height: app.globalData.height,
+    })
+    page = this;
+    that.bindbt();
   }
   ,
-  login(data){
+  login(data) {
     var that = this
     wx.showLoading({
       title: '正在登录',
     })
 
-    util.request(AUTH_LOGIN, data,'POST').then(res => {
+    util.request(AUTH_LOGIN, data, 'POST').then(res => {
       if (res.code == 200) {
         wx.setStorageSync("user", res.body.user);
         wx.setStorageSync("token", res.body.token);
@@ -318,7 +353,7 @@ Page({
         wx.hideLoading()
         wx.showLoading({
           title: '登录失败',
-          duration:1500
+          duration: 1500
         })
       }
 
@@ -332,6 +367,7 @@ Page({
     return param < 10 ? '0' + param : param;
   },
   countDown() {//倒计时函数
+    let that = this;
     // 获取当前时间，同时得到活动结束时间数组
     let newTime = new Date().getTime();
     let endTimeList = this.data.actEndTimeList;
@@ -339,10 +375,10 @@ Page({
 
     // 对结束时间进行处理渲染到页面
     endTimeList.forEach(o => {
-      let endTime = new Date("2019-01-02 00:00:00".replace(/-/g, "/")).getTime();
+      let endTime = new Date("2019-01-05 19:00:00".replace(/-/g, "/")).getTime();
 
       let obj = null;
-    
+
       // 如果活动未结束，对时间进行处理
       if (endTime - newTime > 0) {
         let time = (endTime - newTime) / 1000;
@@ -364,21 +400,29 @@ Page({
           min: '00',
           sec: '00'
         }
+        that.setData({
+          end: true
+        })
       }
       countDownArr.push(obj);
     })
     // 渲染，然后每隔一秒执行一次倒计时函数
     this.setData({ countDownList: countDownArr })
-   var timeInter= setTimeout(this.countDown, 1000);
+    var timeInter = setTimeout(this.countDown, 1000);
 
-   this.setData({
-     timeInter: timeInter
-   })
+    this.setData({
+      timeInter: timeInter
+    })
   },
-  result(){
+  result() {
+    if (this.data.end) {
+      console.log(3333333)
+    }
+
+
     wx.showModal({
       title: '等待开奖',
-      content: "开奖倒计时：" + this.data.countDownList[0].day + "天" + this.data.countDownList[0].hou + "时" + this.data.countDownList[0].min + "分" + this.data.countDownList[0].sec +"秒",
+      content: "开奖倒计时：" + this.data.countDownList[0].day + "天" + this.data.countDownList[0].hou + "时" + this.data.countDownList[0].min + "分" + this.data.countDownList[0].sec + "秒",
       showCancel: true, //是否显示取消按钮
       cancelText: "关闭", //默认是“取消”
       confirmText: "确定", //默认是“确定”
@@ -390,28 +434,16 @@ Page({
 
       }, //接口调用结束的回调函数（调用成功、失败都会执行）
     })
-    
+
   },
-  showCredit(){
+  showCredit() {
+    let that = this;
     // wx.showLoading({
     //   title: '研发中',
     //   duration: 1500,
     // })
-
-    wx.showModal({
-      title: '获取抽奖凭证',
-      content: "将生成的图片分享至朋友圈，截图到群内，获取抽奖凭证",
-      showCancel: true, //是否显示取消按钮
-      cancelText: "关闭", //默认是“取消”
-      confirmText: "确定", //默认是“确定”
-      success: function (res) {
-        if (res.cancel) {}
-      
-      },
-      fail: function (res) { }, //接口调用失败的回调函数
-      complete: function (res) {
-
-      }, //接口调用结束的回调函数（调用成功、失败都会执行）
+    that.setData({
+      showSuccess: true
     })
 
 
@@ -422,42 +454,47 @@ Page({
 
 
 
+
   },
 
+  close() {
+    this.setData({
+      showSuccess: false
+    })
+  }
 
-  
 
 })
 
 var doommList = [];
-var timeArray=[];
-var topArray = [4,2,5,2,3]
+var timeArray = [];
+var topArray = [4, 2, 5, 2, 3]
 var flag = false;
 var i = 0;
 class Doomm {
   constructor(avatar, text, top, time, color) {
-    if (topArray.length<2){
+    if (topArray.length < 2) {
       topArray = [5, 2, 3, 4, 3]
       flag = !flag;
     }
-    if (flag){
+    if (flag) {
       flag = !flag;
 
-      top =3;
+      top = 3;
 
-    }else{
+    } else {
       top = topArray.shift();
-      
+
       topArray.splice(topArray.indexOf(top), 1);
       topArray.push(top)
-     
+
     }
-   
-    top = top*6-5;
-    if (topArray.length <1) {
+
+    top = top * 6 - 5;
+    if (topArray.length < 1) {
       topArray.unshift(3)
     }
-   
+
     this.avatar = avatar;
     this.text = text;
     this.top = top;
@@ -466,8 +503,8 @@ class Doomm {
     this.display = true;
     let that = this;
     this.id = i++;
-   
-  
+
+
   }
 }
 

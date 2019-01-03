@@ -1,9 +1,12 @@
 {
   "pages": [
-
+    
     "pages/index/index",
+    "pages/poster/index",
+   
     "pages/publish/index",
-        "pages/star/index"
+    "pages/star/index"
+   
   ],
   "window": {
     "navigationBarBackgroundColor": "#565765",
